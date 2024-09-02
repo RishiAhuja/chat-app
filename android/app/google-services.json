@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "703455849443",
+    "project_id": "chat-app-5ec7b",
+    "storage_bucket": "chat-app-5ec7b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:703455849443:android:8889b89a9b9b7551f7ced6",
+        "android_client_info": {
+          "package_name": "com.ahuja.chatapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDD9OCVTlueu2W5ZQdrNA5QqkdOGkVhzyQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

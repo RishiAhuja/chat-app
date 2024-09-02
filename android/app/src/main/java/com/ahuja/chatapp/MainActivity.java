@@ -1,4 +1,4 @@
-package com.example.chat.chat_app;
+package com.ahuja.chatapp;
 
 import io.flutter.embedding.android.FlutterActivity;
 
