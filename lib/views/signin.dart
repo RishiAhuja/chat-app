@@ -1,19 +1,19 @@
 import 'package:chat_app/services/auth.dart';
 import 'package:chat_app/views/chat_room.dart';
-import 'package:chat_app/views/signup.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 
 class SignIn extends StatefulWidget {
-  const SignIn({super.key});
-
+  final Function toggle;
+  SignIn({required this.toggle});
   @override
   State<SignIn> createState() => _SignInState();
 }
 
 class _SignInState extends State<SignIn> {
+
   final AuthMethods _auth = AuthMethods();
   final formKey = GlobalKey<FormState>();
   bool isLoading = false;
@@ -221,7 +221,8 @@ class _SignInState extends State<SignIn> {
                   const SizedBox(width: 5),
                   GestureDetector(
                     onTap: (){
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SignUp()));
+                      widget.toggle();
+                      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SignUp()));
                     },
                     child: Text(
                       "Create one!",

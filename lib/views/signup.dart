@@ -1,4 +1,5 @@
 import 'package:chat_app/services/auth.dart';
+import 'package:chat_app/services/database.dart';
 import 'package:chat_app/views/chat_room.dart';
 import 'package:chat_app/views/signin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 
 class SignUp extends StatefulWidget {
-  const SignUp({super.key});
+  final Function toggle;
+  SignUp({required this.toggle});
 
   @override
   State<SignUp> createState() => _SignUpState();
@@ -19,6 +21,8 @@ class _SignUpState extends State<SignUp> {
   final formKey = GlobalKey<FormState>();
 
   final AuthMethods _auth = AuthMethods();
+  final DatabaseMethods _database = DatabaseMethods();
+
   /*When you create a new instance of a class,
   you are essentially creating a specific object that
   embodies the properties and behaviors defined in that class.
@@ -259,7 +263,7 @@ class _SignUpState extends State<SignUp> {
                   const SizedBox(width: 5),
                   GestureDetector(
                     onTap: (){
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SignIn()));
+                      widget.toggle();
                     },
                     child: Text(
                       "Login!",
@@ -290,7 +294,13 @@ class _SignUpState extends State<SignUp> {
       setState(() {
         isLoading = true;
       });
+      Map<String, String> userInfo = {
+        "name" : name,
+        "email" : email,
+        "password" : password
+      };
       User? user = await _auth.signUpWithEmailAndPassword(email, password).then((val){
+        _database.uploadUserInfo(userInfo);
         print("email: ${val?.email}");
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ChatRoom()));
       });
