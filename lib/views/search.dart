@@ -1,4 +1,6 @@
+import 'package:chat_app/services/constants.dart';
 import 'package:chat_app/services/database.dart';
+import 'package:chat_app/views/conversation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,10 +23,11 @@ class _SearchState extends State<Search> {
       shrinkWrap: true,
         itemCount: querySnapshot?.docs.length,
         itemBuilder: (context, index) {
-          return UserTile(
-              email: (querySnapshot?.docs[index].data()
-                  as Map<String, dynamic>)["email"],
-              username: (querySnapshot?.docs[index].data()
+
+          return userTile(
+              ((querySnapshot?.docs[index].data()
+                  as Map<String, dynamic>)["email"]),
+              (querySnapshot?.docs[index].data()
                   as Map<String, dynamic>)["name"]);
         });
   }
@@ -76,7 +79,7 @@ class _SearchState extends State<Search> {
                       ),
                     ),
                   ),
-                  InkWell(
+                  GestureDetector(
                     onTap: () {
                       getUserDataList();
                     },
@@ -119,15 +122,31 @@ class _SearchState extends State<Search> {
       print(data["password"]);
     });
   }
-}
 
-class UserTile extends StatelessWidget {
-  final String username;
-  final String email;
+  createChatRoom(String searchUserName) async{
+    String roomId = getChatRoomId(searchUserName, Constants.localUsername);
+    List<String> users = [searchUserName, Constants.localUsername];
+    Map<String, dynamic> chatRoomMap = {
+      "chatRoomId": roomId,
+      "users": users
+    };
+    await _database.createChatRoom(roomId, chatRoomMap).then((a){
+      print(a);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Conversation(roomId: roomId,)));
+    });
+  }
 
-  UserTile({required this.email, required this.username, super.key});
-  @override
-  Widget build(BuildContext context) {
+  //still need to find explanation:
+
+  String getChatRoomId(String a, String b) {
+    if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
+      return "${b}_$a";
+    } else {
+      return "${a}_$b";
+    }
+  }
+
+  Widget userTile(String email, String username){
     return Row(
       children: [
         Expanded(
@@ -139,7 +158,7 @@ class UserTile extends StatelessWidget {
             decoration: BoxDecoration(
                 color: HexColor("#262630"),
                 borderRadius:
-                    const BorderRadius.horizontal(left: Radius.circular(10))),
+                const BorderRadius.horizontal(left: Radius.circular(10))),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -155,20 +174,79 @@ class UserTile extends StatelessWidget {
             ),
           ),
         ),
+
         Expanded(
           flex: 1,
-          child: Container(
-              height: 80,
-              decoration: BoxDecoration(
-                  color: HexColor("#5953ff"),
-                  borderRadius: const BorderRadius.horizontal(
-                      right: Radius.circular(10))),
-              child: const Icon(
-                Icons.email,
-                color: Colors.white,
-              )),
-        )
+          child: GestureDetector(
+            onTap: () => createChatRoom(username),
+            child: Container(
+                height: 80,
+                decoration: BoxDecoration(
+                    color: HexColor("#5953ff"),
+                    borderRadius: const BorderRadius.horizontal(
+                        right: Radius.circular(10))),
+                child: const Icon(
+                  Icons.email,
+                  color: Colors.white,
+                )),
+          ),
+        ),
       ],
     );
   }
+
 }
+
+
+// class UserTile extends StatelessWidget {
+//   final String username;
+//   final String email;
+//
+//   UserTile({required this.email, required this.username, super.key});
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       children: [
+//         Expanded(
+//           flex: 3,
+//           child: Container(
+//             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+//             margin: const EdgeInsets.symmetric(vertical: 10),
+//             height: 80,
+//             decoration: BoxDecoration(
+//                 color: HexColor("#262630"),
+//                 borderRadius:
+//                     const BorderRadius.horizontal(left: Radius.circular(10))),
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   username,
+//                   style: GoogleFonts.archivo(color: Colors.white, fontSize: 18),
+//                 ),
+//                 Text(
+//                   email,
+//                   style: GoogleFonts.archivo(color: Colors.white, fontSize: 12),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ),
+//
+//           Expanded(
+//             flex: 1,
+//             child: Container(
+//                 height: 80,
+//                 decoration: BoxDecoration(
+//                     color: HexColor("#5953ff"),
+//                     borderRadius: const BorderRadius.horizontal(
+//                         right: Radius.circular(10))),
+//                 child: const Icon(
+//                   Icons.email,
+//                   color: Colors.white,
+//                 )),
+//           ),
+//       ],
+//     );
+//   }
+// }

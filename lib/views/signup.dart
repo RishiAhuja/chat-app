@@ -1,5 +1,6 @@
 import 'package:chat_app/services/auth.dart';
 import 'package:chat_app/services/database.dart';
+import 'package:chat_app/services/helper.dart';
 import 'package:chat_app/views/chat_room.dart';
 import 'package:chat_app/views/signin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,6 +23,7 @@ class _SignUpState extends State<SignUp> {
 
   final AuthMethods _auth = AuthMethods();
   final DatabaseMethods _database = DatabaseMethods();
+  final Helper _helper = Helper();
 
   /*When you create a new instance of a class,
   you are essentially creating a specific object that
@@ -299,6 +301,9 @@ class _SignUpState extends State<SignUp> {
         "email" : email,
         "password" : password
       };
+      _helper.setLogStatus(true);
+      _helper.setEmail(email);
+      _helper.setName(name);
       User? user = await _auth.signUpWithEmailAndPassword(email, password).then((val){
         _database.uploadUserInfo(userInfo);
         print("email: ${val?.email}");

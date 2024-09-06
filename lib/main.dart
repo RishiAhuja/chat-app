@@ -1,4 +1,6 @@
 import 'package:chat_app/services/authenticate.dart';
+import 'package:chat_app/services/helper.dart';
+import 'package:chat_app/views/chat_room.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,11 +13,22 @@ void main() async{
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // This widget is the root of your application.
+  bool isLoggedIn = false;
+  final Helper _helper = Helper();
+  @override
+  void initState(){
+    getLogStatus();
+    super.initState();
+  }
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
@@ -23,7 +36,18 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: Authenticate(),
+      home: isLoggedIn ? ChatRoom() : Authenticate(),
     );
+  }
+
+  getLogStatus() async{
+    await _helper.getLogStatus().then((a){
+      print("LogStatus: $a");
+      setState(() {
+        if(a!=null){
+          isLoggedIn = a;
+        }
+      });
+    });
   }
 }

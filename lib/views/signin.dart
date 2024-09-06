@@ -1,5 +1,8 @@
 import 'package:chat_app/services/auth.dart';
+import 'package:chat_app/services/database.dart';
+import 'package:chat_app/services/helper.dart';
 import 'package:chat_app/views/chat_room.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,6 +18,9 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
 
   final AuthMethods _auth = AuthMethods();
+  final DatabaseMethods _database = DatabaseMethods();
+  final Helper _helper = Helper();
+
   final formKey = GlobalKey<FormState>();
   bool isLoading = false;
 
@@ -250,10 +256,27 @@ class _SignInState extends State<SignIn> {
       setState(() {
         isLoading = true;
       });
+      QuerySnapshot? snapshot;
       User? user = await _auth.signInWithEmailAndPassword(emailController.text.trim(), passwordController.text.trim()).then((user){
         print("email:${user?.email}");
         print("loggedin successfully");
+        _database.searchUsersByEmail(emailController.text).then(
+            (val){
+              snapshot = val;
+              print(val);
+            }
+        );
+
+        String username = (snapshot?.docs[0].data() as Map<String, dynamic>)["name"];
+        String email = (snapshot?.docs[0].data() as Map<String, dynamic>)["email"];
+
+        print(username);
+        print(email);
+        _helper.setName(username);
+        _helper.setEmail(email);
+      }).then((val){
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ChatRoom()));
+        return null;
       });
     }
 

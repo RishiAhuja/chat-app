@@ -1,9 +1,11 @@
 import 'package:chat_app/services/auth.dart';
 import 'package:chat_app/services/authenticate.dart';
+import 'package:chat_app/services/helper.dart';
 import 'package:chat_app/views/search.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+
+import '../services/constants.dart';
 
 class ChatRoom extends StatefulWidget {
   const ChatRoom({super.key});
@@ -14,7 +16,29 @@ class ChatRoom extends StatefulWidget {
 
 class _ChatRoomState extends State<ChatRoom> {
   final AuthMethods _auth = AuthMethods();
+  final Helper _helper = Helper();
   @override
+
+  void initState(){
+    getUserData();
+    super.initState();
+  }
+
+  getUserData() async{
+    String? name;
+    String? email;
+    await _helper.getName().then((val){
+      name = val;
+    });
+    await _helper.getEmail().then((val){
+      email = val;
+    });
+    Constants.localUsername = name!;
+    Constants.localEmail = email!;
+
+    print(Constants.localUsername);
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: HexColor("#131419"),
