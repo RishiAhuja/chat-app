@@ -1,5 +1,6 @@
 import 'package:chat_app/services/constants.dart';
 import 'package:chat_app/services/database.dart';
+import 'package:chat_bubbles/bubbles/bubble_normal.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -30,7 +31,10 @@ class _ConversationState extends State<Conversation> {
             itemCount: snapshot.data.docs.length,
             itemBuilder: (context, index){
               // return SizedBox();
-              return MessageTile(message: (snapshot.data.docs[index].data())["message"] );
+              return MessageTile(message: (snapshot.data.docs[index].data())["message"],
+                sentByLocalUser: (((snapshot.data.docs[index].data())["sender"]).toString() == Constants.localUsername ) ? true : false,
+                // time: ((snapshot.data.docs[index].data())["time"]) as DateTime
+              );
             },
           ) : const SizedBox();
         }
@@ -71,8 +75,10 @@ class _ConversationState extends State<Conversation> {
     return Scaffold(
       backgroundColor: HexColor("#131419"),
       appBar: AppBar(
-        backgroundColor: HexColor("#131419"),
-      ),
+          leading: IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back_outlined, color: Colors.white)),
+          backgroundColor: HexColor("#131419")),
       body: Container(
         padding: const EdgeInsets.all(20),
         child: Stack(
@@ -138,13 +144,31 @@ class _ConversationState extends State<Conversation> {
 
 class MessageTile extends StatelessWidget {
   final String? message;
-  MessageTile({this.message, super.key});
+  final bool? sentByLocalUser;
+  final DateTime? time;
+  MessageTile({this.message, this.sentByLocalUser, this.time, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 50,
-      child: Text(message!, style: TextStyle(color: Colors.white),),
+    // return SizedBox(
+    //   height: 50,
+    //   child: Text(message!, style: TextStyle(color: Colors.white),),
+    // );
+    return Column(
+      children: [
+        BubbleNormal(
+          text: message!,
+          tail: true,
+          color: sentByLocalUser! ? HexColor("#5953ff") : Colors.grey,
+          sent: false,
+          isSender: sentByLocalUser!,
+          textStyle: GoogleFonts.archivo(
+            color: Colors.white
+          ),
+        ),
+        const SizedBox(height: 5)
+      ],
     );
+
   }
 }
