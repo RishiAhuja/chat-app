@@ -28,7 +28,11 @@ class _SearchState extends State<Search> {
               ((querySnapshot?.docs[index].data()
                   as Map<String, dynamic>)["email"]),
               (querySnapshot?.docs[index].data()
-                  as Map<String, dynamic>)["name"]);
+                  as Map<String, dynamic>)["name"],
+              (querySnapshot?.docs[index].data()
+                  as Map<String, dynamic>)["imageSvg"]
+          );
+
         });
   }
 
@@ -50,9 +54,7 @@ class _SearchState extends State<Search> {
                 children: [
                   Expanded(
                     child: Container(
-                      // width: MediaQuery.of(context).size.width / 3,
                       height: 70,
-                      // margin: const EdgeInsets.symmetric(horizontal: 10),
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
                           color: HexColor("#262630"),
@@ -100,7 +102,12 @@ class _SearchState extends State<Search> {
                 ],
               ),
               const SizedBox(height: 20),
-              querySnapshot == null ? Container() : searchList(),
+              querySnapshot!.docs.isEmpty ? Text(
+                'No user called "${searchController.text.trim()}" exists, please search another user or check typos',
+                style: GoogleFonts.archivo(
+                  color: Colors.white,
+                ),
+              ) : searchList(),
             ],
           ),
         ),
@@ -114,25 +121,27 @@ class _SearchState extends State<Search> {
       setState(() {
         querySnapshot = val;
       });
-      Map<String, dynamic> data =
-          querySnapshot?.docs[0].data() as Map<String, dynamic>;
-
-      print(data["name"]);
-      print(data["email"]);
-      print(data["password"]);
+      // Map<String, dynamic> data =
+      //     querySnapshot?.docs[0].data() as Map<String, dynamic>;
+      print(querySnapshot?.docs.isEmpty);
     });
   }
 
-  createChatRoom(String searchUserName) async{
+  createChatRoom(String searchUserName, String svg) async{
     String roomId = getChatRoomId(searchUserName, Constants.localUsername);
     List<String> users = [searchUserName, Constants.localUsername];
+    List<String> usersSvg = [
+      svg,
+      Constants.localSvg
+    ];
     Map<String, dynamic> chatRoomMap = {
       "chatRoomId": roomId,
-      "users": users
+      "users": users,
+      "userSvg": usersSvg
     };
     await _database.createChatRoom(roomId, chatRoomMap).then((a){
       print(a);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Conversation(roomId: roomId,)));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Conversation(roomId: roomId, svg: svg, name: searchUserName,)));
     });
   }
 
@@ -146,7 +155,7 @@ class _SearchState extends State<Search> {
     }
   }
 
-  Widget userTile(String email, String username){
+  Widget userTile(String email, String username, String svg){
     return Row(
       children: [
         Expanded(
@@ -178,7 +187,7 @@ class _SearchState extends State<Search> {
         Expanded(
           flex: 1,
           child: GestureDetector(
-            onTap: () => createChatRoom(username),
+            onTap: () => createChatRoom(username, svg),
             child: Container(
                 height: 80,
                 decoration: BoxDecoration(

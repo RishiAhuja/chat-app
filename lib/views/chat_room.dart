@@ -3,10 +3,12 @@ import 'package:chat_app/services/authenticate.dart';
 import 'package:chat_app/services/database.dart';
 import 'package:chat_app/services/helper.dart';
 import 'package:chat_app/views/conversation.dart';
+import 'package:chat_app/views/forgotp.dart';
 import 'package:chat_app/views/search.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:random_avatar/random_avatar.dart';
 
 import '../services/constants.dart';
 
@@ -33,14 +35,23 @@ class _ChatRoomState extends State<ChatRoom> {
   getUserData() async{
     String? name;
     String? email;
+    String? svg;
+
     await _helper.getName().then((val){
       name = val;
     });
     await _helper.getEmail().then((val){
       email = val;
     });
+    print("debugger2");
+    await _helper.getSvg().then((val){
+      svg = val;
+    });
+    print(svg);
     Constants.localUsername = name!;
     Constants.localEmail = email!;
+    Constants.localSvg = svg!;
+
     await _database.getChatRooms(Constants.localUsername).then((val){
       setState(() {
         chatRoomStream = val;
@@ -52,17 +63,90 @@ class _ChatRoomState extends State<ChatRoom> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: HexColor("#131419"),
-      appBar: AppBar(
-        leading: IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back_outlined, color: Colors.white)
+      backgroundColor: Constants.backgroundColor,
+      drawer: Drawer(
+
+        child: Container(
+          decoration: BoxDecoration(
+            color: HexColor("#262630")
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 30,),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 20),
+                child: RandomAvatar(
+                  Constants.localSvg,
+                  height: MediaQuery.of(context).size.width/2,
+                  width: MediaQuery.of(context).size.width/2
+                ),
+              ),
+              Text(
+                Constants.localUsername,
+                style: GoogleFonts.archivo(
+                  color: Colors.white,
+                  fontSize: 25
+                ),
+              ),
+              Text(
+                Constants.localEmail,
+                style: GoogleFonts.archivo(
+                    color: Colors.white,
+                    fontSize: 18
+                ),
+              ),
+              const SizedBox(height: 30),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => ForgotP(email: Constants.localEmail))
+                ),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width/1.5,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    decoration: BoxDecoration(
+                        color: HexColor("#5953ff"),
+                        borderRadius: BorderRadius.circular(10)
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Forgot password?",
+                        style: GoogleFonts.archivo(
+                            color: Colors.white,
+                            fontSize: 20
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        backgroundColor: HexColor("#131419"),
+      ),
+      appBar: AppBar(
+        iconTheme: const IconThemeData(
+          color: Colors.white, // Change the color here
+        ),
+        title: Text(
+          "Chat Rooms",
+          style: GoogleFonts.archivo(
+            color: Colors.white,
+            fontSize: 24
+          ),
+        ),
+      toolbarHeight: 70,
+        backgroundColor: Constants.backgroundColor,
         actions: [
           GestureDetector(
             onTap: () {
               _auth.signOut();
+              _helper.setLogStatus(false);
+              _helper.setName("");
+              _helper.setSvg("");
+              _helper.setEmail("");
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const Authenticate()));
             },
             child: Container(
@@ -80,26 +164,26 @@ class _ChatRoomState extends State<ChatRoom> {
         backgroundColor: HexColor("#5953ff"),
         child: const Icon(Icons.search, color: Colors.white),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Chat Rooms",
-                  style: GoogleFonts.archivo(
-                    color: Colors.white,
-                    fontSize: 25
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              chatRoomList()
-            ],
-          ),
-        )
+      body: Container(
+        // margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
+        child: Column(
+          children: [
+            // Align(
+            //   alignment: Alignment.center,
+            //   child: Text(
+            //     "Chat Rooms",
+            //     style: GoogleFonts.archivo(
+            //       color: Colors.white,
+            //       fontSize: 30
+            //     ),
+            //   ),
+            // ),
+            const SizedBox(height: 10),
+            SizedBox(
+                height: MediaQuery.of(context).size.height * .7,
+                child: chatRoomList())
+          ],
+        ),
       ),
     );
   }
@@ -108,16 +192,40 @@ class _ChatRoomState extends State<ChatRoom> {
     return StreamBuilder(
         stream: chatRoomStream,
         builder: (context, snapshot) {
-          return snapshot.hasData
-              ? ListView.builder(
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}', style: GoogleFonts.archivo(color: Colors.red),));
+          }
+
+          if (snapshot.data!.docs.isEmpty) {
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 30),
+              child: Center(
+                  child: Text(
+                    'No chats rooms found, please create a chat room by searching for a user',
+                    style: GoogleFonts.archivo(color: Colors.white60),
+                  )
+              ),
+            );
+          }
+          return ListView.builder(
             shrinkWrap: true,
             itemCount: snapshot.data.docs.length,
             itemBuilder: (context, index){
               return ChatRoomTile(
-                username: (snapshot.data.docs[index].data())["chatRoomId"],
+                username: (Constants.localUsername != (snapshot.data.docs[index].data())["users"][0])
+                ? (snapshot.data.docs[index].data())["users"][0] :
+                (snapshot.data.docs[index].data())["users"][1],
+                roomId: (snapshot.data.docs[index].data())["chatRoomId"],
+                svg: (Constants.localSvg != (snapshot.data.docs[index].data())["userSvg"][0]) ?
+                  (snapshot.data.docs[index].data())["userSvg"][0]
+                : (snapshot.data.docs[index].data())["users"][1],
               );
             },
-          ) : Container();
+          );
         }
     );
   }
@@ -126,58 +234,89 @@ class _ChatRoomState extends State<ChatRoom> {
 class ChatRoomTile extends StatelessWidget {
   final String? username;
   final String? email;
+  final String? roomId;
+  final String? svg;
 
-  ChatRoomTile({this.username, this.email, super.key});
+  ChatRoomTile({required this.username, this.email, required this.roomId, required this.svg, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            height: 80,
-            decoration: BoxDecoration(
-                color: HexColor("#262630"),
-                borderRadius:
-                const BorderRadius.horizontal(left: Radius.circular(10))),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  username!.trim(),
-                  style: GoogleFonts.archivo(color: Colors.white, fontSize: 18),
+    return GestureDetector(
+      onTap: (){
+          Navigator.push(context, 
+            MaterialPageRoute(builder: (context) => Conversation(
+                roomId: roomId,
+                name: username,
+                svg: svg
+            ))
+          );
+      },
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                  height: 70,
+                  decoration: BoxDecoration(
+                      // color: HexColor("#2b2547"),
+                    color: HexColor("#262630"),
+                      borderRadius:
+                      BorderRadius.circular(15)
+                  ),
+                  child: Row(
+                    // crossAxisAlignment: CrossAxisAlignment.start,
+                    // mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      RandomAvatar(
+                        svg!,
+                        height: 50,
+                        width: 52,
+                      ),
+                      const SizedBox(width: 14),
+                      Text(
+                        username!.trim(),
+                        style: GoogleFonts.archivo(color: Colors.white, fontSize: 20),
+                      ),
+                      // Text(
+                      //   email!.trim(),
+                      //   style: GoogleFonts.archivo(color: Colors.white, fontSize: 12),
+                      // ),
+                    ],
+                  ),
                 ),
-                // Text(
-                //   email!.trim(),
-                //   style: GoogleFonts.archivo(color: Colors.white, fontSize: 12),
-                // ),
-              ],
-            ),
-          ),
-        ),
+              ),
 
-        Expanded(
-          flex: 1,
-          child: GestureDetector(
-            onTap: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context) => Conversation(roomId: username)));
-            },
-            child: Container(
-                height: 80,
-                decoration: BoxDecoration(
-                    color: HexColor("#5953ff"),
-                    borderRadius: const BorderRadius.horizontal(
-                        right: Radius.circular(10))),
-                child: const Icon(
-                  Icons.email,
-                  color: Colors.white,
-                )),
+              // Expanded(
+              //   flex: 1,
+              //   child: GestureDetector(
+              //
+              //     child: Container(
+              //         height: 60,
+              //         decoration: BoxDecoration(
+              //             color: HexColor("#5953ff"),
+              //             // borderRadius: const BorderRadius.horizontal(
+              //             //     right: Radius.circular(10))
+              //         ),
+              //         child: const Icon(
+              //           Icons.email,
+              //           color: Colors.white,
+              //         )),
+              //   ),
+              // ),
+            ],
           ),
-        ),
-      ],
+          // const Divider(
+          //   color: Colors.grey,
+          //   thickness: 1.0,
+          //   indent: 0, // Removes the horizontal margin
+          //   endIndent: 0, // Removes the horizontal margin
+          //   height: 1, // Adjusts the vertical margin
+          // )
+        ],
+      ),
     );
   }
 

@@ -46,4 +46,14 @@ class AuthMethods{
     }
     return null;
   }
+
+  Future sendResetPasswordEmail(String email) async{
+    try{
+      return await _auth.sendPasswordResetEmail(email: email);
+    }
+    on FirebaseAuthException catch(e){
+      print(e.message);
+    }
+    return null;
+  }
 }

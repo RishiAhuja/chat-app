@@ -1,9 +1,8 @@
 import 'package:chat_app/services/auth.dart';
+import 'package:chat_app/services/constants.dart';
 import 'package:chat_app/services/database.dart';
-import 'package:chat_app/services/helper.dart';
-import 'package:chat_app/views/chat_room.dart';
-import 'package:chat_app/views/signin.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:chat_app/views/avatar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -17,34 +16,24 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-  bool isLoading = false;
 
   final formKey = GlobalKey<FormState>();
-
-  final AuthMethods _auth = AuthMethods();
-  final DatabaseMethods _database = DatabaseMethods();
-  final Helper _helper = Helper();
-
-  /*When you create a new instance of a class,
-  you are essentially creating a specific object that
-  embodies the properties and behaviors defined in that class.
-  This is done by calling the class's constructor.*/
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  final _database = DatabaseMethods();
+
+  QuerySnapshot? snapshot;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: HexColor("#131419"),
+      backgroundColor: Constants.backgroundColor,
       appBar: AppBar(
-        backgroundColor: HexColor("#131419"),
+        backgroundColor: Constants.backgroundColor,
       ),
       body: SingleChildScrollView(
-        child: isLoading ? Center(
-          child: CircularProgressIndicator(
-            color: HexColor("#5953ff"),
-          ),
-        ): Container(
+        child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +201,32 @@ class _SignUpState extends State<SignUp> {
               //------------login and forgot button------------//
         
               GestureDetector(
-                onTap: _signUp,
+                onTap: () async{
+                  String name = nameController.text.trim();
+                  String email = emailController.text.trim();
+                  String password = passwordController.text.trim();
+
+                  if(formKey.currentState!.validate()){
+                    await _database.searchUsersByName(name).then((val){
+                      snapshot = val;
+                      if(snapshot!.docs.isEmpty){
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => Avatar(
+                              email: email,
+                              password: password,
+                              name: name,
+                            ))
+                        );
+                      }else{
+                        showPopup(context, "Error", "This username is already in use, please use another username");
+                      }
+                    }).catchError((e){
+                      print(e);
+                      showPopup(context, "Error", e.toString());
+                    });
+                  }
+
+                },
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Container(
@@ -284,33 +298,42 @@ class _SignUpState extends State<SignUp> {
           ),
         ),
       ),
-    );;
+    );
   }
 
-  void _signUp() async {
-    String name = nameController.text.trim();
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
+}
 
-    if(formKey.currentState!.validate()){
-      setState(() {
-        isLoading = true;
-      });
-      Map<String, String> userInfo = {
-        "name" : name,
-        "email" : email,
-        "password" : password
-      };
-      _helper.setLogStatus(true);
-      _helper.setEmail(email);
-      _helper.setName(name);
-      User? user = await _auth.signUpWithEmailAndPassword(email, password).then((val){
-        _database.uploadUserInfo(userInfo);
-        print("email: ${val?.email}");
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ChatRoom()));
-      });
-    }
-  }
-
-
+void showPopup(BuildContext context, String heading, String content) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: HexColor("#262630"),
+        title: Text(
+          heading,
+          style: GoogleFonts.archivo(
+              color: Colors.white,
+              fontSize: 25
+          ),
+        ),
+        content: Text(
+          content,
+          style: GoogleFonts.archivo(
+              color: Colors.white,
+              fontSize: 15
+          )
+          ,
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              // Handle the OK action
+              Navigator.of(context).pop(); // Close the dialog
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

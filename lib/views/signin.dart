@@ -1,7 +1,9 @@
 import 'package:chat_app/services/auth.dart';
+import 'package:chat_app/services/constants.dart';
 import 'package:chat_app/services/database.dart';
 import 'package:chat_app/services/helper.dart';
 import 'package:chat_app/views/chat_room.dart';
+import 'package:chat_app/views/forgotp.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -29,16 +31,16 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: HexColor("#131419"),
+      backgroundColor: Constants.backgroundColor,
       appBar: AppBar(
-        backgroundColor: HexColor("#131419"),
+        backgroundColor: Constants.backgroundColor,
       ),
-      body: SingleChildScrollView(
-        child: isLoading ? Center(
-          child: CircularProgressIndicator(
-            color: HexColor("#5953ff"),
-          ),
-        ): Container(
+      body: isLoading ? Center(
+        child: CircularProgressIndicator(
+          color: HexColor("#5953ff"),
+        ),
+      ) : SingleChildScrollView(
+        child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,6 +141,7 @@ class _SignInState extends State<SignIn> {
                                     return null;
                                   },
                                   controller: passwordController,
+                                  obscureText: true,
                                   decoration: InputDecoration(
                                     hintText: "Password",
                                     hintStyle: GoogleFonts.archivo(),
@@ -164,11 +167,16 @@ class _SignInState extends State<SignIn> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Forgot password?",
-                    style: GoogleFonts.archivo(
-                      color: Colors.white,
-                      fontSize: 12
+                  GestureDetector(
+                    onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => ForgotP())
+                    ),
+                    child: Text(
+                      "Forgot password?",
+                      style: GoogleFonts.archivo(
+                        color: Colors.white,
+                        fontSize: 12
+                      ),
                     ),
                   ),
                   GestureDetector(
@@ -257,10 +265,10 @@ class _SignInState extends State<SignIn> {
         isLoading = true;
       });
       QuerySnapshot? snapshot;
-      User? user = await _auth.signInWithEmailAndPassword(emailController.text.trim(), passwordController.text.trim()).then((user){
+      User? user = await _auth.signInWithEmailAndPassword(emailController.text.trim(), passwordController.text.trim()).then((user) async{
         print("email:${user?.email}");
         print("loggedin successfully");
-        _database.searchUsersByEmail(emailController.text).then(
+        await _database.searchUsersByEmail(emailController.text).then(
             (val){
               snapshot = val;
               print(val);
@@ -269,11 +277,14 @@ class _SignInState extends State<SignIn> {
 
         String username = (snapshot?.docs[0].data() as Map<String, dynamic>)["name"];
         String email = (snapshot?.docs[0].data() as Map<String, dynamic>)["email"];
+        String imageSvg = (snapshot?.docs[0].data() as Map<String, dynamic>)["imageSvg"];
 
         print(username);
         print(email);
         _helper.setName(username);
         _helper.setEmail(email);
+        _helper.setLogStatus(true);
+        _helper.setSvg(imageSvg);
       }).then((val){
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ChatRoom()));
         return null;

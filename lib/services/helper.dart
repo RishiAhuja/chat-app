@@ -18,6 +18,11 @@ class Helper{
     return await saveEmail.setString("email", email);
   }
 
+  Future<bool> setSvg(String svg) async{
+    SharedPreferences saveEmail = await SharedPreferences.getInstance();
+    return await saveEmail.setString("svg", svg);
+  }
+
   Future<bool?> getLogStatus() async{
     SharedPreferences saveLogStatus = await SharedPreferences.getInstance();
     return saveLogStatus.getBool("log");
@@ -32,6 +37,11 @@ class Helper{
   Future<String?> getEmail() async{
     SharedPreferences saveEmail = await SharedPreferences.getInstance();
     return saveEmail.getString("email");
+  }
+
+  Future<String?> getSvg() async{
+    SharedPreferences saveEmail = await SharedPreferences.getInstance();
+    return saveEmail.getString("svg");
   }
 
 }

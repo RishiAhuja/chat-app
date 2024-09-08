@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
+import 'package:random_avatar/random_avatar.dart';
 
 class Conversation extends StatefulWidget {
   final roomId;
-
-  Conversation({required this.roomId, super.key});
+  final name;
+  final svg;
+  Conversation({required this.roomId, required this.svg, required this.name, super.key});
 
   @override
   State<Conversation> createState() => _ConversationState();
@@ -36,7 +38,7 @@ class _ConversationState extends State<Conversation> {
                 // time: ((snapshot.data.docs[index].data())["time"]) as DateTime
               );
             },
-          ) : const SizedBox();
+          ) : CircularProgressIndicator(color: HexColor("#5953ff"),);
         }
     );
   }
@@ -75,15 +77,44 @@ class _ConversationState extends State<Conversation> {
     return Scaffold(
       backgroundColor: HexColor("#131419"),
       appBar: AppBar(
-          leading: IconButton(
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back_outlined, color: Colors.white)),
-          backgroundColor: HexColor("#131419")),
+        toolbarHeight: 80,
+        title: Container(
+          // margin: const EdgeInsets.symmetric(horizontal: 10),
+          child: Row(
+            children: [
+                RandomAvatar(
+                  widget.svg,
+                  height: 45,
+                  width: 45
+                ),
+              const SizedBox(width: 15),
+              Text(
+                widget.name,
+                style: GoogleFonts.archivo(
+                  color: Colors.white,
+                  fontSize: 20
+                ),
+              )
+            ],
+          ),
+        ),
+          leading: GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: const Icon(Icons.arrow_back_outlined, color: Colors.white)
+          ),
+          backgroundColor: HexColor("#262630"),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(30),
+          ),
+        ),
+      ),
       body: Container(
         padding: const EdgeInsets.all(20),
         child: Stack(
           children: [
             chatList(),
+            const SizedBox(height: 60),
             Container(
               alignment: Alignment.bottomCenter,
               child: Row(
@@ -159,11 +190,12 @@ class MessageTile extends StatelessWidget {
         BubbleNormal(
           text: message!,
           tail: true,
-          color: sentByLocalUser! ? HexColor("#5953ff") : Colors.grey,
+          color: sentByLocalUser! ? HexColor("#5953ff") : HexColor("#2e333d"),
           sent: false,
           isSender: sentByLocalUser!,
           textStyle: GoogleFonts.archivo(
-            color: Colors.white
+            color: Colors.white,
+            fontSize: 18
           ),
         ),
         const SizedBox(height: 5)
