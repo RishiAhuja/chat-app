@@ -31,5 +31,10 @@ class DatabaseMethods
   getChatRooms(String username) async{
     return await FirebaseFirestore.instance.collection("chatrooms").where("users", arrayContains: username).snapshots();
   }
-
+  
+  updateDeleted(String roomId, String chatId,  bool deleted) async{
+    return await FirebaseFirestore.instance.collection("chatrooms").doc(roomId).collection("chats").doc(chatId).update({
+      "deleted" : deleted
+    });
+  }
 }

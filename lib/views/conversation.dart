@@ -1,13 +1,12 @@
 import 'package:chat_app/services/constants.dart';
 import 'package:chat_app/services/database.dart';
 import 'package:chat_bubbles/bubbles/bubble_normal.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:random_avatar/random_avatar.dart';
-import 'package:vengamo_chat_ui/theme/app_color.dart';
-import 'package:vengamo_chat_ui/vengamo_chat_ui.dart';
 
 class Conversation extends StatefulWidget {
   final roomId;
@@ -21,7 +20,6 @@ class Conversation extends StatefulWidget {
 
 class _ConversationState extends State<Conversation> {
 
-
   final DatabaseMethods _databaseMethods = DatabaseMethods();
   final TextEditingController _messageController = TextEditingController();
   Stream? streamForInitialMessages;
@@ -34,11 +32,17 @@ class _ConversationState extends State<Conversation> {
           return snapshot.hasData ? ListView.builder(
             itemCount: snapshot.data.docs.length,
             itemBuilder: (context, index){
-              return MessageTile(message: (snapshot.data.docs[index].data())["message"],
+              return MessageTile(
+                roomId: widget.roomId,
+                chatId: (snapshot.data!.docs[index] as DocumentSnapshot).id.toString(),
+                // roomId: snapshot.data.docs[index],
+                message: (snapshot.data.docs[index].data())["message"],
                 sentByLocalUser: (((snapshot.data.docs[index].data())["sender"]).toString() == Constants.localUsername ) ? true : false,
                 time: DateTime.fromMillisecondsSinceEpoch(int.parse(
                     ((snapshot.data.docs[index].data())["time"]).toString()
-                ))
+                )),
+                deleted: ((snapshot.data.docs[index].data()["deleted"]) == null )
+                ? false : (snapshot.data.docs[index].data()["deleted"]),
 
               );
             },
@@ -48,7 +52,7 @@ class _ConversationState extends State<Conversation> {
   }
 
   sendMessage() async{
-    String formattedTime = DateFormat('HH:mm').format(now);
+    // String formattedTime = DateFormat('HH:mm').format(now);
     String date = "${now.day}/${now.month}/${now.year}";
     Map<String, dynamic> userMap = {
       "message": _messageController.text.trim(),
@@ -56,7 +60,8 @@ class _ConversationState extends State<Conversation> {
       "time": DateTime
           .now()
           .millisecondsSinceEpoch,
-      "date": date
+      "date": date,
+      "deleted": false
     };
     setState(() {
       _messageController.text = "";
@@ -117,8 +122,10 @@ class _ConversationState extends State<Conversation> {
         padding: const EdgeInsets.all(20),
         child: Stack(
           children: [
-            chatList(),
-            const SizedBox(height: 60),
+            SizedBox(
+              height: MediaQuery.of(context).size.height/1.5,
+                child: chatList()
+            ),
             Container(
               alignment: Alignment.bottomCenter,
               child: Row(
@@ -177,54 +184,100 @@ class _ConversationState extends State<Conversation> {
   }
 }
 
-class MessageTile extends StatelessWidget {
+class MessageTile extends StatefulWidget {
   final String message;
   final bool sentByLocalUser;
   final DateTime time;
-  MessageTile({required this.message, required this.sentByLocalUser, required this.time, super.key});
+  final bool deleted;
+  final String roomId;
+  final String chatId;
+  MessageTile({required this.chatId, required this.roomId, required this.message, required this.sentByLocalUser, required this.time, required this.deleted, super.key});
+
+  @override
+  State<MessageTile> createState() => _MessageTileState();
+}
+
+class _MessageTileState extends State<MessageTile> {
+  bool onTap = false;
+  final DatabaseMethods _database = DatabaseMethods();
 
   @override
   Widget build(BuildContext context) {
-    // return SizedBox(
-    //   height: 50,
-    //   child: Text(message!, style: TextStyle(color: Colors.white),),
-    // );
-    return Column(
+
+    return Row(
+      mainAxisAlignment: widget.sentByLocalUser ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: [
-        BubbleNormal(
-          text: message,
-          tail: true,
-          color: sentByLocalUser ? HexColor("#5953ff") : HexColor("#2e333d"),
-          sent: false,
-          isSender: sentByLocalUser,
-          textStyle: GoogleFonts.archivo(
-            color: Colors.white,
-            fontSize: 18
-          ),
+        if(onTap) GestureDetector(
+          onTap: () async{
+            await _database.updateDeleted(widget.roomId, widget.chatId, true).then((val){
+              print("successfully deleted");
+              setState(() {
+                onTap = !onTap;
+              });
+            });
+          },
+            child: const Icon(Icons.delete_forever, color: Colors.white,
+            )),
+        if(onTap) const SizedBox(width: 5),
+        Column(
+          children: [
+            GestureDetector(
+              onTap: (){
+                if(widget.sentByLocalUser && !widget.deleted){
+                  setState(() {
+                    onTap = !onTap;
+                  });
+                }
+              },
+              child: Align(
+                alignment: widget.sentByLocalUser ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  decoration: BoxDecoration(
+                    borderRadius: widget.sentByLocalUser ? const BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                        bottomLeft: Radius.circular(15)
+                    ) : const BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                        bottomRight: Radius.circular(15)
+                    ),
+                      color: widget.sentByLocalUser ? HexColor("#5953ff") : HexColor("#2e333d")
+                  ),
+                  child: Column(
+                    crossAxisAlignment: widget.sentByLocalUser ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if(widget.deleted) const Icon(Icons.disabled_by_default_outlined, color: Colors.white54,),
+                          Text(
+                            widget.deleted ?  "This message has been deleted" : widget.message,
+                            style: GoogleFonts.archivo(
+                              color: widget.deleted ? Colors.white54 : Colors.white,
+                              fontSize: widget.deleted ? 14 : 18,
+                              fontStyle: widget.deleted ? FontStyle.italic : FontStyle.normal
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        DateFormat("HH:mm").format(widget.time),
+                        style: GoogleFonts.archivo(
+                          color: Colors.white,
+                          fontSize: 10
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 5)
+          ],
         ),
-        // VengamoChatUI(
-        //   senderBgColor: HexColor("#5953ff"),
-        //   receiverBgColor: HexColor("#2e333d"),
-        //   isSender: sentByLocalUser,
-        //   isNextMessageFromSameSender: false,
-        //   time: DateFormat("HH:mm").format(time),
-        //   timeLabelColor : Colors.white,
-        //   text: Text(
-        //       message,
-        //     style: GoogleFonts.archivo(
-        //         color: Colors.white,
-        //         fontSize: 16
-        //     ),
-        //   ),
-        //   pointer: true,
-        //   ack: const Icon(
-        //     Icons.check,
-        //     color: AppColors.iconColor, // You can customize the color here
-        //     size: 13, // You can customize the size here
-        //   ),
-        // ),
-        // Text("${time?.hour}:${time?.minute}:${time?.second}", style: GoogleFonts.archivo(color: Colors.white),),
-        const SizedBox(height: 5)
       ],
     );
 
