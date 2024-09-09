@@ -15,11 +15,11 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   final searchController = TextEditingController();
-
+  bool noResultFound = false;
   final DatabaseMethods _database = DatabaseMethods();
   QuerySnapshot? querySnapshot;
   Widget searchList() {
-    return ListView.builder(
+    return querySnapshot == null ? Container() : ListView.builder(
       shrinkWrap: true,
         itemCount: querySnapshot?.docs.length,
         itemBuilder: (context, index) {
@@ -102,8 +102,9 @@ class _SearchState extends State<Search> {
                 ],
               ),
               const SizedBox(height: 20),
-              querySnapshot!.docs.isEmpty ? Text(
-                'No user called "${searchController.text.trim()}" exists, please search another user or check typos',
+              // searchList()
+              querySnapshot == null ? Text(
+                noResultFound ? 'No user with username "${searchController.text.trim()}" found, try to search again or check for typos' : "Start typing to find users",
                 style: GoogleFonts.archivo(
                   color: Colors.white,
                 ),
@@ -115,15 +116,21 @@ class _SearchState extends State<Search> {
     );
   }
 
-  getUserDataList() {
-    _database.searchUsersByName(searchController.text.trim()).then((val) {
+  getUserDataList() async{
+    await _database.searchUsersByName(searchController.text.trim()).then((val) {
 
       setState(() {
         querySnapshot = val;
       });
       // Map<String, dynamic> data =
       //     querySnapshot?.docs[0].data() as Map<String, dynamic>;
-      print(querySnapshot?.docs.isEmpty);
+      // print(querySnapshot?.docs.isEmpty);
+      if(querySnapshot!.docs.isEmpty){
+        print(querySnapshot!.docs.isEmpty);
+        setState(() {
+          noResultFound = true;
+        });
+      }
     });
   }
 

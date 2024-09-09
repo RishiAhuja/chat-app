@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:random_avatar/random_avatar.dart';
+import 'package:vengamo_chat_ui/theme/app_color.dart';
+import 'package:vengamo_chat_ui/vengamo_chat_ui.dart';
 
 class Conversation extends StatefulWidget {
   final roomId;
@@ -32,13 +34,15 @@ class _ConversationState extends State<Conversation> {
           return snapshot.hasData ? ListView.builder(
             itemCount: snapshot.data.docs.length,
             itemBuilder: (context, index){
-              // return SizedBox();
               return MessageTile(message: (snapshot.data.docs[index].data())["message"],
                 sentByLocalUser: (((snapshot.data.docs[index].data())["sender"]).toString() == Constants.localUsername ) ? true : false,
-                // time: ((snapshot.data.docs[index].data())["time"]) as DateTime
+                time: DateTime.fromMillisecondsSinceEpoch(int.parse(
+                    ((snapshot.data.docs[index].data())["time"]).toString()
+                ))
+
               );
             },
-          ) : CircularProgressIndicator(color: HexColor("#5953ff"),);
+          ) : Center(child: CircularProgressIndicator(color: HexColor("#5953ff"),));
         }
     );
   }
@@ -174,10 +178,10 @@ class _ConversationState extends State<Conversation> {
 }
 
 class MessageTile extends StatelessWidget {
-  final String? message;
-  final bool? sentByLocalUser;
-  final DateTime? time;
-  MessageTile({this.message, this.sentByLocalUser, this.time, super.key});
+  final String message;
+  final bool sentByLocalUser;
+  final DateTime time;
+  MessageTile({required this.message, required this.sentByLocalUser, required this.time, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -188,16 +192,38 @@ class MessageTile extends StatelessWidget {
     return Column(
       children: [
         BubbleNormal(
-          text: message!,
+          text: message,
           tail: true,
-          color: sentByLocalUser! ? HexColor("#5953ff") : HexColor("#2e333d"),
+          color: sentByLocalUser ? HexColor("#5953ff") : HexColor("#2e333d"),
           sent: false,
-          isSender: sentByLocalUser!,
+          isSender: sentByLocalUser,
           textStyle: GoogleFonts.archivo(
             color: Colors.white,
             fontSize: 18
           ),
         ),
+        // VengamoChatUI(
+        //   senderBgColor: HexColor("#5953ff"),
+        //   receiverBgColor: HexColor("#2e333d"),
+        //   isSender: sentByLocalUser,
+        //   isNextMessageFromSameSender: false,
+        //   time: DateFormat("HH:mm").format(time),
+        //   timeLabelColor : Colors.white,
+        //   text: Text(
+        //       message,
+        //     style: GoogleFonts.archivo(
+        //         color: Colors.white,
+        //         fontSize: 16
+        //     ),
+        //   ),
+        //   pointer: true,
+        //   ack: const Icon(
+        //     Icons.check,
+        //     color: AppColors.iconColor, // You can customize the color here
+        //     size: 13, // You can customize the size here
+        //   ),
+        // ),
+        // Text("${time?.hour}:${time?.minute}:${time?.second}", style: GoogleFonts.archivo(color: Colors.white),),
         const SizedBox(height: 5)
       ],
     );

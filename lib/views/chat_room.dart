@@ -200,7 +200,7 @@ class _ChatRoomState extends State<ChatRoom> {
             return Center(child: Text('Error: ${snapshot.error}', style: GoogleFonts.archivo(color: Colors.red),));
           }
 
-          if (snapshot.data!.docs.isEmpty) {
+          if (!snapshot.hasData) {
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 30),
               child: Center(
@@ -222,7 +222,7 @@ class _ChatRoomState extends State<ChatRoom> {
                 roomId: (snapshot.data.docs[index].data())["chatRoomId"],
                 svg: (Constants.localSvg != (snapshot.data.docs[index].data())["userSvg"][0]) ?
                   (snapshot.data.docs[index].data())["userSvg"][0]
-                : (snapshot.data.docs[index].data())["users"][1],
+                : (snapshot.data.docs[index].data())["userSvg"][1],
               );
             },
           );
@@ -280,10 +280,6 @@ class ChatRoomTile extends StatelessWidget {
                         username!.trim(),
                         style: GoogleFonts.archivo(color: Colors.white, fontSize: 20),
                       ),
-                      // Text(
-                      //   email!.trim(),
-                      //   style: GoogleFonts.archivo(color: Colors.white, fontSize: 12),
-                      // ),
                     ],
                   ),
                 ),
