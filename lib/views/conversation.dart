@@ -1,8 +1,8 @@
 import 'package:chat_app/services/constants.dart';
 import 'package:chat_app/services/database.dart';
-import 'package:chat_bubbles/bubbles/bubble_normal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
@@ -25,17 +25,37 @@ class _ConversationState extends State<Conversation> {
   Stream? streamForInitialMessages;
   DateTime now = DateTime.now();
 
+  int unreadMessages = 0;
+
   Widget chatList(){
     return StreamBuilder(
         stream: streamForInitialMessages,
         builder: (context, snapshot){
+          if(snapshot.hasData){
+            final documents = snapshot.data!.docs;
+            final notSeenDocs = [];
+
+            for(var i = 0; i < documents.length; i++){
+              //print((documents[i] as DocumentSnapshot).id.toString());
+              //print(((documents[i]).data())["seen"]);
+              if((((documents[i]).data())["seen"] == false) && (((documents[i]).data())["sender"] != Constants.localUsername)){
+                notSeenDocs.add((documents[i] as DocumentSnapshot).id.toString());
+                _databaseMethods.updateSeen(widget.roomId, (documents[i] as DocumentSnapshot).id.toString(), true);
+                _databaseMethods.updateUnreadMessages(widget.roomId, 0, Constants.localUsername);
+              }
+
+
+              //print(notSeenDocs);
+              // _databaseMethods.updateSeen(widget.roomId, (documents[i] as DocumentSnapshot).id.toString(), true);
+            }
+          }
           return snapshot.hasData ? ListView.builder(
             itemCount: snapshot.data.docs.length,
             itemBuilder: (context, index){
               return MessageTile(
+                seen: ((snapshot.data.docs[index].data())["seen"] != null) ? (snapshot.data.docs[index].data())["seen"] : true,
                 roomId: widget.roomId,
                 chatId: (snapshot.data!.docs[index] as DocumentSnapshot).id.toString(),
-                // roomId: snapshot.data.docs[index],
                 message: (snapshot.data.docs[index].data())["message"],
                 sentByLocalUser: (((snapshot.data.docs[index].data())["sender"]).toString() == Constants.localUsername ) ? true : false,
                 time: DateTime.fromMillisecondsSinceEpoch(int.parse(
@@ -61,12 +81,17 @@ class _ConversationState extends State<Conversation> {
           .now()
           .millisecondsSinceEpoch,
       "date": date,
-      "deleted": false
+      "deleted": false,
+      "seen": false
     };
     setState(() {
       _messageController.text = "";
+      unreadMessages++;
+      print(unreadMessages);
     });
     await _databaseMethods.conversation(widget.roomId, userMap).then((a){print("done: $a");});
+    await _databaseMethods.updateUnreadMessages(widget.roomId, unreadMessages, widget.name);
+
   }
   @override
 
@@ -184,6 +209,7 @@ class _ConversationState extends State<Conversation> {
   }
 }
 
+
 class MessageTile extends StatefulWidget {
   final String message;
   final bool sentByLocalUser;
@@ -191,7 +217,8 @@ class MessageTile extends StatefulWidget {
   final bool deleted;
   final String roomId;
   final String chatId;
-  MessageTile({required this.chatId, required this.roomId, required this.message, required this.sentByLocalUser, required this.time, required this.deleted, super.key});
+  final bool seen;
+  MessageTile({required this.chatId, required this.seen, required this.roomId, required this.message, required this.sentByLocalUser, required this.time, required this.deleted, super.key});
 
   @override
   State<MessageTile> createState() => _MessageTileState();
@@ -263,12 +290,22 @@ class _MessageTileState extends State<MessageTile> {
                           ),
                         ],
                       ),
-                      Text(
-                        DateFormat("HH:mm").format(widget.time),
-                        style: GoogleFonts.archivo(
-                          color: Colors.white,
-                          fontSize: 10
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            DateFormat("HH:mm").format(widget.time),
+                            style: GoogleFonts.archivo(
+                              color: Colors.white,
+                              fontSize: 10
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Icon(
+                              FontAwesomeIcons.check,
+                            color: (widget.seen == false) ? Colors.white : Colors.lightBlueAccent,
+                            size: 12,
+                          )
+                        ],
                       ),
                     ],
                   ),

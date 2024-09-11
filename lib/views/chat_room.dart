@@ -168,16 +168,6 @@ class _ChatRoomState extends State<ChatRoom> {
         // margin: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
         child: Column(
           children: [
-            // Align(
-            //   alignment: Alignment.center,
-            //   child: Text(
-            //     "Chat Rooms",
-            //     style: GoogleFonts.archivo(
-            //       color: Colors.white,
-            //       fontSize: 30
-            //     ),
-            //   ),
-            // ),
             const SizedBox(height: 10),
             SizedBox(
                 height: MediaQuery.of(context).size.height * .7,
@@ -192,6 +182,10 @@ class _ChatRoomState extends State<ChatRoom> {
     return StreamBuilder(
         stream: chatRoomStream,
         builder: (context, snapshot) {
+
+        if((snapshot.data.docs[0].data())["unreadMessages"] !=null){
+          print((snapshot.data.docs[0].data())["unreadMessages"][Constants.localUsername.toString()]);
+    }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -216,6 +210,9 @@ class _ChatRoomState extends State<ChatRoom> {
             itemCount: snapshot.data.docs.length,
             itemBuilder: (context, index){
               return ChatRoomTile(
+                unreadMessages: ((snapshot.data.docs[index].data())["unreadMessages"] != null)
+                ? (snapshot.data.docs[index].data())["unreadMessages"][Constants.localUsername.toString()]
+                : 0,
                 username: (Constants.localUsername != (snapshot.data.docs[index].data())["users"][0])
                 ? (snapshot.data.docs[index].data())["users"][0] :
                 (snapshot.data.docs[index].data())["users"][1],
@@ -236,8 +233,9 @@ class ChatRoomTile extends StatelessWidget {
   final String? email;
   final String? roomId;
   final String? svg;
+  final int? unreadMessages;
 
-  ChatRoomTile({required this.username, this.email, required this.roomId, required this.svg, super.key});
+  ChatRoomTile({required this.unreadMessages, required this.username, this.email, required this.roomId, required this.svg, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -267,19 +265,37 @@ class ChatRoomTile extends StatelessWidget {
                       BorderRadius.circular(15)
                   ),
                   child: Row(
-                    // crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      RandomAvatar(
-                        svg!,
-                        height: 50,
-                        width: 52,
+                      Row(
+                        children: [
+                          RandomAvatar(
+                            svg!,
+                            height: 50,
+                            width: 52,
+                          ),
+                          const SizedBox(width: 14),
+                          Text(
+                            username!.trim(),
+                            style: GoogleFonts.archivo(color: Colors.white, fontSize: 20),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 14),
-                      Text(
-                        username!.trim(),
-                        style: GoogleFonts.archivo(color: Colors.white, fontSize: 20),
+                      const Spacer(),
+                      if(unreadMessages !=0) Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: HexColor("#5953ff"),
+                          borderRadius: BorderRadius.circular(50)
+                        ),
+                        child: Text(
+                          unreadMessages.toString(),
+                          style: GoogleFonts.archivo(
+                            color: Colors.white,
+                            fontSize: 15
+                          ),
+                        ),
                       ),
+                      const SizedBox(width: 5),
                     ],
                   ),
                 ),

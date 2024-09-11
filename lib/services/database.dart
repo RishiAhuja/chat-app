@@ -37,4 +37,16 @@ class DatabaseMethods
       "deleted" : deleted
     });
   }
+
+  updateSeen(String roomId, String chatId, bool seen) async{
+    return await FirebaseFirestore.instance.collection("chatrooms").doc(roomId).collection("chats").doc(chatId).update({
+      "seen" : seen
+    });
+  }
+
+  updateUnreadMessages(String chatId, int messages, String receiver) async{
+    return await FirebaseFirestore.instance.collection("chatrooms").doc(chatId).update({
+      "unreadMessages.$receiver" : messages
+    });
+  }
 }

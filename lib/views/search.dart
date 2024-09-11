@@ -144,7 +144,11 @@ class _SearchState extends State<Search> {
     Map<String, dynamic> chatRoomMap = {
       "chatRoomId": roomId,
       "users": users,
-      "userSvg": usersSvg
+      "userSvg": usersSvg,
+      "unreadMessages" : {
+        searchUserName : 0,
+        Constants.localUsername : 0
+      }
     };
     await _database.createChatRoom(roomId, chatRoomMap).then((a){
       print(a);
