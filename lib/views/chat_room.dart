@@ -3,6 +3,7 @@ import 'package:chat_app/services/authenticate.dart';
 import 'package:chat_app/services/database.dart';
 import 'package:chat_app/services/helper.dart';
 import 'package:chat_app/views/conversation.dart';
+import 'package:chat_app/views/create_group.dart';
 import 'package:chat_app/views/forgotp.dart';
 import 'package:chat_app/views/search.dart';
 import 'package:flutter/material.dart';
@@ -65,7 +66,6 @@ class _ChatRoomState extends State<ChatRoom> {
     return Scaffold(
       backgroundColor: Constants.backgroundColor,
       drawer: Drawer(
-
         child: Container(
           decoration: BoxDecoration(
             color: HexColor("#262630")
@@ -140,6 +140,13 @@ class _ChatRoomState extends State<ChatRoom> {
       toolbarHeight: 70,
         backgroundColor: Constants.backgroundColor,
         actions: [
+          IconButton(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => CreateGroup(
+              // stream: chatRoomStream,
+            ))),
+            icon: const Icon(Icons.add), color: Colors.white,
+            tooltip: "Add new group",
+          ),
           GestureDetector(
             onTap: () {
               _auth.signOut();
@@ -234,8 +241,14 @@ class ChatRoomTile extends StatelessWidget {
   final String? roomId;
   final String? svg;
   final int? unreadMessages;
-
-  ChatRoomTile({required this.unreadMessages, required this.username, this.email, required this.roomId, required this.svg, super.key});
+  ChatRoomTile({
+    required this.unreadMessages,
+    required this.username,
+    this.email,
+    required this.roomId,
+    required this.svg,
+    super.key}
+);
 
   @override
   Widget build(BuildContext context) {
@@ -286,7 +299,7 @@ class ChatRoomTile extends StatelessWidget {
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: HexColor("#5953ff"),
-                            borderRadius: BorderRadius.circular(100),
+                            borderRadius: BorderRadius.circular(50),
                           ),
                           child: Align(
                             alignment: Alignment.center,

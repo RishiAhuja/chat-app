@@ -1,4 +1,3 @@
-import 'package:chat_app/services/auth.dart';
 import 'package:chat_app/services/constants.dart';
 import 'package:chat_app/services/database.dart';
 import 'package:chat_app/views/avatar.dart';

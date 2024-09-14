@@ -29,17 +29,6 @@ class _ConversationState extends State<Conversation> {
 
   int unreadMessages = 0;
 
-  // Widget paginate(){
-  //   return FirestorePagination(
-  //     query: _databaseMethods.getConversationPaginate(widget.roomId),
-  //     itemBuilder: (context, snapshot, index) {
-  //       final data = snapshot.data() as Map<String, dynamic>;
-  //
-  //     },
-  //     isLive: true, // Enables real-time updates
-  //     bottomLoader: Center(child: CircularProgressIndicator()),
-  //   );
-  // }
 
   Widget paginate() {
     return FirestorePagination(
