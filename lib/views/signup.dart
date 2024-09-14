@@ -82,6 +82,9 @@ class _SignUpState extends State<SignUp> {
                                 } else if (value.length < 3) {
                                   return 'Name must be at least 3 characters long';
                                 }
+                                else if (value.contains(" ")){
+                                  return 'Spaces are not allowed';
+                                }
                                 return null;
                                 },
                                 style: GoogleFonts.archivo(

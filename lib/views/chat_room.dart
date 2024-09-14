@@ -183,9 +183,9 @@ class _ChatRoomState extends State<ChatRoom> {
         stream: chatRoomStream,
         builder: (context, snapshot) {
 
-        if((snapshot.data.docs[0].data())["unreadMessages"] !=null){
-          print((snapshot.data.docs[0].data())["unreadMessages"][Constants.localUsername.toString()]);
-    }
+    //     if((snapshot.data.docs[0].data())["unreadMessages"] != null){
+    //       print((snapshot.data.docs[0].data())["unreadMessages"][Constants.localUsername.toString()]);
+    // }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -281,17 +281,22 @@ class ChatRoomTile extends StatelessWidget {
                         ],
                       ),
                       const Spacer(),
-                      if(unreadMessages !=0) Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: HexColor("#5953ff"),
-                          borderRadius: BorderRadius.circular(50)
-                        ),
-                        child: Text(
-                          unreadMessages.toString(),
-                          style: GoogleFonts.archivo(
-                            color: Colors.white,
-                            fontSize: 15
+                      if(unreadMessages !=0) CircleAvatar(
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: HexColor("#5953ff"),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              unreadMessages.toString(),
+                              style: GoogleFonts.archivo(
+                                color: Colors.white,
+                                fontSize: 16
+                              ),
+                            ),
                           ),
                         ),
                       ),
