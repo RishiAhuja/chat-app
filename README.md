@@ -1,16 +1,34 @@
-# chat_app
+## Chat App
 
-A new Flutter project.
+An app for chit-chatting and with friends in groups.
 
-## Getting Started
+Here are a few resources to get you started, if you want to download the Latest version:
 
-This project is a starting point for a Flutter application.
+- [Download Here](https://github.com/RishiAhuja/chat-app/releases)
+- [Framework: flutter](https://flutter.dev/)
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Screenshots
+<a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/assets/2.png">
+    <img src="screen/1-e.png" alt="screen1", height=30%, width=30%>
+  </a>
+<a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/assets/5.png">
+    <img src="screen/3-e.png" alt="screen2", height=30%, width=30%>
+  </a>
+<a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/assets/3.png">
+    <img src="screen/2-e.png" alt="screen3", height=30%, width=30%>
+  </a>
+<a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/assets/6.png">
+    <img src="screen/4-e.png" alt="screen4", height=30%, width=30%>
+  </a>
+<a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/assets/4.png">
+    <img src="screen/5-e.png" alt="screen4", height=30%, width=30%>
+  </a>
+<a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/assets/7.png">
+    <img src="screen/6-e.png" alt="screen4", height=30%, width=30%>
+  </a>
+<a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/assets/9.png">
+    <img src="screen/7-e.png" alt="screen4", height=30%, width=30%>
+  </a>
+  <a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/assets/8.png">
+    <img src="screen/7-e.png" alt="screen4", height=30%, width=30%>
+  </a>
