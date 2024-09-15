@@ -1,16 +1,59 @@
-# chat_app
+  <div align='center'>
+  <a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/master/assets/readme/icon.png">
+    <img src="assets/icon.png" alt="Logo" width="80" height="80">
+  </a>
+</div>
 
-A new Flutter project.
+  <h3 align="center">Chat App</h3>
 
-## Getting Started
+  
+  <p align="center">
+    A simple chat application built with flutter and firebase
+    <br />
+    <a href="https://github.com/RishiAhuja/chat-app"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/RishiAhuja/chat-app/releases">Download Now</a>
+    ·
+    <a href="mailto:www.rishiahuja@gmail.com">Report Bug or Feature</a>
+  </p>
+</p>
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+<!-- ABOUT THE PROJECT -->
+## Screenshots
+<a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/master/assets/2.png">
+    <img src="assets/2.png" alt="screen1", height=30%, width=30%>
+  </a>
+<a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/master/assets/3.png">
+    <img src="assets/3.png" alt="screen2", height=30%, width=30%>
+  </a>
+<a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/master/assets/4.png">
+    <img src="assets/4.png" alt="screen3", height=30%, width=30%>
+  </a>
+  <a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/master/assets/6.png">
+    <img src="assets/6.png" alt="screen3", height=30%, width=30%>
+  </a>
+  <a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/master/assets/5.png">
+    <img src="assets/5.png" alt="screen3", height=30%, width=30%>
+  </a>
+  <a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/master/assets/7.png">
+    <img src="assets/7.png" alt="screen3", height=30%, width=30%>
+  </a>
+   <a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/master/assets/8.png">
+    <img src="assets/8.png" alt="screen3", height=30%, width=30%>
+  </a>
+  <a href="https://raw.githubusercontent.com/RishiAhuja/chat-app/master/assets/9.png">
+    <img src="assets/9.png" alt="screen3", height=30%, width=30%>
+  </a>
+<br>
+
+### Acknowledgements
+
+* [Flutter](https://flutter.dev)
+* [Firebase](https://firebase.google.com)
+* [Github.com](https://github.com/RishiAhuja)
+* [Flat Icons](https://flaticon.com)
