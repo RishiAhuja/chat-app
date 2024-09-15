@@ -23,7 +23,6 @@ class Conversation extends StatefulWidget {
 class _ConversationState extends State<Conversation> {
   final DatabaseMethods _databaseMethods = DatabaseMethods();
   final TextEditingController _messageController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
   Stream? streamForInitialMessages;
   DateTime now = DateTime.now();
 
